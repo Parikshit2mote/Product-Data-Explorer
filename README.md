@@ -243,10 +243,6 @@ docker-compose up -d
 
 This is an internship assignment project. For questions, contact [your email].
 
-## 📄 License
-
-MIT License - feel free to use for learning purposes.
-
 ## 🙏 Acknowledgments
 
 - World of Books for the product data source
