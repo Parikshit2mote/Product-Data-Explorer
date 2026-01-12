@@ -21,12 +21,17 @@ export class ScraperService {
 
     async scrapeNavigation() {
         const { chromium } = require('playwright');
-        const browser = await chromium.launch({ headless: true });
+
+        // Launch with no-sandbox for container environments
+        const browser = await chromium.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
 
         try {
-            console.log('Starting direct navigation scrape...');
-            await page.goto('https://www.worldofbooks.com/en-gb/', { waitUntil: 'networkidle' });
+            this.logger.log('Starting direct navigation scrape...');
+            await page.goto('https://www.worldofbooks.com/en-gb/', { waitUntil: 'networkidle', timeout: 60000 });
 
             const navItems = await page.$$eval('a', (links) => {
                 return links
@@ -44,7 +49,7 @@ export class ScraperService {
             });
 
             const uniqueItems: any[] = Array.from(new Map(navItems.map((item: any) => [item.slug, item])).values());
-            console.log(`Found ${uniqueItems.length} unique navigation items`);
+            this.logger.log(`Found ${uniqueItems.length} unique navigation items`);
 
             for (const item of uniqueItems) {
                 const nav: any = await this.navigationModel.findOneAndUpdate(
@@ -63,6 +68,9 @@ export class ScraperService {
                     { upsert: true }
                 );
             }
+        } catch (error) {
+            this.logger.error('Failed to scrape navigation', error.stack);
+            throw error;
         } finally {
             await browser.close();
         }
@@ -70,13 +78,16 @@ export class ScraperService {
 
     async scrapeCategory(slug: string) {
         const { chromium } = require('playwright');
-        const browser = await chromium.launch({ headless: true });
+        const browser = await chromium.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         const url = `https://www.worldofbooks.com/en-gb/collections/${slug}`;
 
         try {
-            console.log(`Starting direct category scrape for ${slug}...`);
-            await page.goto(url, { waitUntil: 'networkidle' });
+            this.logger.log(`Starting direct category scrape for ${slug}...`);
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 
             // Target the parent container that has both link and image
             const products = await page.$$eval('li.grid__item', (items) => {
@@ -134,13 +145,16 @@ export class ScraperService {
 
     async scrapeProduct(sourceId: string) {
         const { chromium } = require('playwright');
-        const browser = await chromium.launch({ headless: true });
+        const browser = await chromium.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
         const page = await browser.newPage();
         const url = `https://www.worldofbooks.com/en-gb/products/${sourceId}`;
 
         try {
-            console.log(`Starting direct product scrape for ${sourceId}...`);
-            await page.goto(url, { waitUntil: 'networkidle' });
+            this.logger.log(`Starting direct product scrape for ${sourceId}...`);
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
 
             // Better description selector
             const description = await page.$eval('.rich-text__text.rte, .product-description, .description', (el) => el.innerHTML).catch(() => 'No description available');
