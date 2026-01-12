@@ -9,6 +9,10 @@ RUN npm ci
 # Copy source
 COPY . .
 
+# Build argument for API URL
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Build
 RUN npm run build
 
@@ -22,6 +26,8 @@ ENV NODE_ENV production
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+
+ENV HOSTNAME="0.0.0.0"
 
 EXPOSE 3000
 

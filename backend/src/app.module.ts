@@ -5,6 +5,7 @@ import { ScraperModule } from './scraper/scraper.module';
 import { ProductsController } from './products/products.controller';
 import { CategoriesController } from './categories/categories.controller';
 import { NavigationController } from './navigation/navigation.controller';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { NavigationController } from './navigation/navigation.controller';
     ProductsController,
     CategoriesController,
     NavigationController,
+    AppController,
   ],
   providers: [],
 })
